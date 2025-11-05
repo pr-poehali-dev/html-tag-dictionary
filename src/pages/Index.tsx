@@ -1,234 +1,14 @@
 import { useState, useMemo } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
 import { Card } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import Icon from '@/components/ui/icon';
-
-interface HTMLTag {
-  name: string;
-  category: string;
-  description: string;
-  example: string;
-  attributes?: string[];
-}
-
-const htmlTags: HTMLTag[] = [
-  {
-    name: 'div',
-    category: 'Структура',
-    description: 'Универсальный контейнер для группировки содержимого',
-    example: '<div>Содержимое</div>',
-    attributes: ['class', 'id', 'style']
-  },
-  {
-    name: 'span',
-    category: 'Текст',
-    description: 'Встроенный контейнер для текста',
-    example: '<span>Текст</span>',
-    attributes: ['class', 'id']
-  },
-  {
-    name: 'p',
-    category: 'Текст',
-    description: 'Параграф текста',
-    example: '<p>Параграф</p>',
-    attributes: ['class', 'id']
-  },
-  {
-    name: 'h1',
-    category: 'Текст',
-    description: 'Заголовок первого уровня',
-    example: '<h1>Заголовок</h1>',
-    attributes: ['class', 'id']
-  },
-  {
-    name: 'h2',
-    category: 'Текст',
-    description: 'Заголовок второго уровня',
-    example: '<h2>Подзаголовок</h2>',
-    attributes: ['class', 'id']
-  },
-  {
-    name: 'a',
-    category: 'Текст',
-    description: 'Гиперссылка',
-    example: '<a href="url">Ссылка</a>',
-    attributes: ['href', 'target', 'rel']
-  },
-  {
-    name: 'img',
-    category: 'Медиа',
-    description: 'Изображение',
-    example: '<img src="image.jpg" alt="описание" />',
-    attributes: ['src', 'alt', 'width', 'height']
-  },
-  {
-    name: 'video',
-    category: 'Медиа',
-    description: 'Видео контент',
-    example: '<video src="video.mp4" controls></video>',
-    attributes: ['src', 'controls', 'autoplay', 'loop']
-  },
-  {
-    name: 'audio',
-    category: 'Медиа',
-    description: 'Аудио контент',
-    example: '<audio src="audio.mp3" controls></audio>',
-    attributes: ['src', 'controls', 'autoplay']
-  },
-  {
-    name: 'input',
-    category: 'Формы',
-    description: 'Поле ввода',
-    example: '<input type="text" placeholder="Введите текст" />',
-    attributes: ['type', 'name', 'placeholder', 'value']
-  },
-  {
-    name: 'button',
-    category: 'Формы',
-    description: 'Кнопка',
-    example: '<button>Нажми меня</button>',
-    attributes: ['type', 'disabled', 'onclick']
-  },
-  {
-    name: 'form',
-    category: 'Формы',
-    description: 'Форма для ввода данных',
-    example: '<form action="/submit" method="post"></form>',
-    attributes: ['action', 'method', 'enctype']
-  },
-  {
-    name: 'select',
-    category: 'Формы',
-    description: 'Выпадающий список',
-    example: '<select><option>Вариант</option></select>',
-    attributes: ['name', 'multiple', 'size']
-  },
-  {
-    name: 'textarea',
-    category: 'Формы',
-    description: 'Многострочное поле ввода',
-    example: '<textarea rows="4"></textarea>',
-    attributes: ['rows', 'cols', 'placeholder']
-  },
-  {
-    name: 'header',
-    category: 'Семантика',
-    description: 'Шапка страницы или секции',
-    example: '<header>Заголовок сайта</header>',
-    attributes: ['class', 'id']
-  },
-  {
-    name: 'nav',
-    category: 'Семантика',
-    description: 'Навигационное меню',
-    example: '<nav>Меню навигации</nav>',
-    attributes: ['class', 'id']
-  },
-  {
-    name: 'main',
-    category: 'Семантика',
-    description: 'Основное содержимое страницы',
-    example: '<main>Основной контент</main>',
-    attributes: ['class', 'id']
-  },
-  {
-    name: 'footer',
-    category: 'Семантика',
-    description: 'Подвал страницы',
-    example: '<footer>Подвал сайта</footer>',
-    attributes: ['class', 'id']
-  },
-  {
-    name: 'article',
-    category: 'Семантика',
-    description: 'Самостоятельная статья',
-    example: '<article>Содержимое статьи</article>',
-    attributes: ['class', 'id']
-  },
-  {
-    name: 'section',
-    category: 'Семантика',
-    description: 'Тематическая секция',
-    example: '<section>Секция контента</section>',
-    attributes: ['class', 'id']
-  },
-  {
-    name: 'ul',
-    category: 'Структура',
-    description: 'Ненумерованный список',
-    example: '<ul><li>Элемент</li></ul>',
-    attributes: ['class', 'id']
-  },
-  {
-    name: 'ol',
-    category: 'Структура',
-    description: 'Нумерованный список',
-    example: '<ol><li>Элемент</li></ol>',
-    attributes: ['class', 'id', 'start']
-  },
-  {
-    name: 'li',
-    category: 'Структура',
-    description: 'Элемент списка',
-    example: '<li>Элемент списка</li>',
-    attributes: ['class', 'id']
-  },
-  {
-    name: 'table',
-    category: 'Структура',
-    description: 'Таблица',
-    example: '<table><tr><td>Ячейка</td></tr></table>',
-    attributes: ['class', 'id']
-  },
-  {
-    name: 'tr',
-    category: 'Структура',
-    description: 'Строка таблицы',
-    example: '<tr><td>Ячейка</td></tr>',
-    attributes: ['class', 'id']
-  },
-  {
-    name: 'td',
-    category: 'Структура',
-    description: 'Ячейка таблицы',
-    example: '<td>Содержимое</td>',
-    attributes: ['colspan', 'rowspan']
-  },
-  {
-    name: 'strong',
-    category: 'Текст',
-    description: 'Важный текст (жирный)',
-    example: '<strong>Важно</strong>',
-    attributes: ['class', 'id']
-  },
-  {
-    name: 'em',
-    category: 'Текст',
-    description: 'Акцентированный текст (курсив)',
-    example: '<em>Акцент</em>',
-    attributes: ['class', 'id']
-  },
-  {
-    name: 'br',
-    category: 'Текст',
-    description: 'Перенос строки',
-    example: 'Текст<br>Новая строка',
-    attributes: []
-  },
-  {
-    name: 'hr',
-    category: 'Структура',
-    description: 'Горизонтальная линия',
-    example: '<hr />',
-    attributes: ['class', 'id']
-  }
-];
-
-const categories = ['Все теги', 'Структура', 'Текст', 'Формы', 'Медиа', 'Семантика'];
+import { htmlTags, categories } from '@/data/htmlTags';
 
 export default function Index() {
+  const navigate = useNavigate();
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedCategory, setSelectedCategory] = useState('Все теги');
 
@@ -250,14 +30,6 @@ export default function Index() {
 
     return filtered;
   }, [searchQuery, selectedCategory]);
-
-  const tagsByCategory = useMemo(() => {
-    const grouped: Record<string, HTMLTag[]> = {};
-    categories.slice(1).forEach(cat => {
-      grouped[cat] = htmlTags.filter(tag => tag.category === cat);
-    });
-    return grouped;
-  }, []);
 
   return (
     <div className="min-h-screen bg-background">
@@ -312,7 +84,8 @@ export default function Index() {
               {filteredTags.map(tag => (
                 <Card
                   key={tag.name}
-                  className="p-6 hover:shadow-lg transition-shadow duration-200 cursor-pointer border-border"
+                  onClick={() => navigate(`/tag/${tag.name}`)}
+                  className="p-6 hover:shadow-lg transition-all duration-200 cursor-pointer border-border hover:border-primary"
                 >
                   <div className="flex items-start justify-between mb-3">
                     <code className="text-2xl font-bold text-primary bg-secondary px-3 py-1 rounded">
@@ -327,21 +100,16 @@ export default function Index() {
                     {tag.description}
                   </p>
 
-                  <div className="bg-muted p-3 rounded-md">
+                  <div className="bg-muted p-3 rounded-md mb-3">
                     <code className="text-xs text-muted-foreground font-mono break-all">
                       {tag.example}
                     </code>
                   </div>
 
-                  {tag.attributes && tag.attributes.length > 0 && (
-                    <div className="mt-3 flex flex-wrap gap-1">
-                      {tag.attributes.map(attr => (
-                        <Badge key={attr} variant="outline" className="text-xs">
-                          {attr}
-                        </Badge>
-                      ))}
-                    </div>
-                  )}
+                  <div className="flex items-center gap-2 text-xs text-primary">
+                    <span>Подробнее</span>
+                    <Icon name="ArrowRight" size={14} />
+                  </div>
                 </Card>
               ))}
             </div>
@@ -370,7 +138,8 @@ export default function Index() {
                 {filteredTags.map(tag => (
                   <Card
                     key={tag.name}
-                    className="p-6 hover:shadow-lg transition-shadow duration-200 cursor-pointer border-border"
+                    onClick={() => navigate(`/tag/${tag.name}`)}
+                    className="p-6 hover:shadow-lg transition-all duration-200 cursor-pointer border-border hover:border-primary"
                   >
                     <div className="flex items-start justify-between mb-3">
                       <code className="text-2xl font-bold text-primary bg-secondary px-3 py-1 rounded">
@@ -382,21 +151,16 @@ export default function Index() {
                       {tag.description}
                     </p>
 
-                    <div className="bg-muted p-3 rounded-md">
+                    <div className="bg-muted p-3 rounded-md mb-3">
                       <code className="text-xs text-muted-foreground font-mono break-all">
                         {tag.example}
                       </code>
                     </div>
 
-                    {tag.attributes && tag.attributes.length > 0 && (
-                      <div className="mt-3 flex flex-wrap gap-1">
-                        {tag.attributes.map(attr => (
-                          <Badge key={attr} variant="outline" className="text-xs">
-                            {attr}
-                          </Badge>
-                        ))}
-                      </div>
-                    )}
+                    <div className="flex items-center gap-2 text-xs text-primary">
+                      <span>Подробнее</span>
+                      <Icon name="ArrowRight" size={14} />
+                    </div>
                   </Card>
                 ))}
               </div>
